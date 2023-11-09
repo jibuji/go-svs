@@ -1,4 +1,4 @@
-module github.com/jibuji/ava-stream
+module github.com/jibuji/go-svs
 
 go 1.21.3
 
