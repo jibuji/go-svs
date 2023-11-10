@@ -15,7 +15,7 @@ Lightweight and super fast functional stream processing library inspired by [mar
 
 - Go 1.21 or higher
 
-This library makes intensive usage of [Type Parameters (generics)](https://go.googlesource.com/proposal/+/refs/heads/master/design/43651-type-parameters.md) so it is not compatible with any Go version lower than 1.18.
+This library makes intensive usage of [Type Parameters (generics)](https://go.googlesource.com/proposal/+/refs/heads/master/design/43651-type-parameters.md) and some new features of Go 1.21 so it is not compatible with any Go version lower than 1.21.
 
 ## Usage examples
 
