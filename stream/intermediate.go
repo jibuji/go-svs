@@ -128,7 +128,7 @@ func Limit[T any](s stream[T], n int) stream[T] {
 	return s.Take(n)
 }
 
-func (s *stream[T]) Limit(maxSize int) stream[T] {
+func (s stream[T]) Limit(maxSize int) stream[T] {
 	return s.Take(maxSize)
 }
 
@@ -219,7 +219,7 @@ func (s stream[T]) Sorted(comparator Comparator[T]) stream[T] {
 		} else {
 			SortSlice(elems, comparator)
 		}
-		fmt.Println("sorted:", elems)
+		// fmt.Println("sorted:", elems)
 	}
 	once := sync.Once{}
 	index := int64(0)

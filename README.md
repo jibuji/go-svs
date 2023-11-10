@@ -1,4 +1,4 @@
-# AVA-Stream API
+# go-svs API
 
 Lightweight and super fast functional stream processing library inspired by [mariomac/gostream](https://github.com/mariomac/gostream) and [RxGo](https://github.com/ReactiveX/RxGo).
 
@@ -51,12 +51,13 @@ func square(n int) int {
 Output:
 
 ```
-1 is a prime number
-2 is a prime number
-3 is a prime number
-5 is a prime number
-7 is a prime number
-11 is a prime number
+1 is a square of a prime number
+4 is a square of a prime number
+9 is a square of a prime number
+16 is a square of a prime number
+25 is a square of a prime number
+49 is a square of a prime number
+121 is a square of a prime number
 ```
 
 ### Example 2: generation, map, limit and slice conversion
@@ -66,21 +67,25 @@ Output:
    (the stream can be **infinite**, but slice can't).
 
 ```go
-rand.Seed(time.Now().UnixMilli())
-fmt.Println("let me throw 5 times a dice for you")
 
-// Generate an infinite stream of random numbers
-// The generator function of the parameter returns a pair (value, hasMore)
-results := stream.Generate(func()(int, bool) {
-    return rand.Int(), true
-}).
-    Map(func(n int) int {
-        return n%6 + 1
-    }).
-    Limit(5).
-    ToSlice()
+func main() {
+	r := rand.New(rand.NewSource(time.Now().UnixMilli()))
+	fmt.Println("let me throw 5 times a dice for you")
 
-fmt.Printf("results: %v\n", results)
+	// Generate an infinite stream of random numbers
+	// The generator function of the parameter returns a pair (value, hasMore)
+	results := stream.Generate(func() (int, bool) {
+		return r.Int(), true
+	}).
+		Map(func(n int) int {
+			return n%6 + 1
+		}).
+		Limit(5).
+		ToSlice()
+
+	fmt.Printf("results: %v\n", results)
+}
+
 ```
 
 Output:
@@ -162,24 +167,42 @@ Deduplicated words: [hello ! ho]
      `Sorted` over an infinite stream (otherwise it would panic).
 
 ```go
-fmt.Println("picking up 5 random numbers from higher to lower")
-stream.Generate(rand.Uint32).
-    Limit(5).
-    Sorted(order.Inverse(order.Natural[uint32])).
-    ForEach(func(n uint32) {
-        fmt.Println(n)
-    })
+
+cmp := func(a, b uint32) int {
+  if a < b {
+    return -1
+  }
+  if a > b {
+    return 1
+  }
+  return 0
+}
+
+
+func main() {
+	r := rand.New(rand.NewSource(time.Now().UnixMilli()))
+	fmt.Println("picking up 5 random numbers from lower to higher")
+	stream.Generate(func() (uint32, bool) {
+		return r.Uint32(), true
+	}).
+		Limit(5).
+		Sorted(cmp).
+		ForEach(func(n uint32) {
+			fmt.Println(n)
+		})
+}
+
 ```
 
 Output:
 
 ```
-picking up 5 random numbers from higher to lower
-4039455774
-2854263694
-2596996162
-1879968118
-1823804162
+picking up 5 random numbers from lower to higher
+2324462508
+2605992364
+2733296373
+3263780948
+4197612992
 ```
 
 ### Example 6: Reduce and helper functions
@@ -204,14 +227,14 @@ The factorial of 8 is 40320
 ### Example 7: Paralleling process
 
 ```go
-facOfFac, _ := stream.Range(1, 900000).
+facOfFac, _ := stream.Range(1, 20).
     Parallel(4). // parallelize the process and use 4 goroutines, then the following operations will be executed in parallel (if possible)
     Map(func(n int) int {
         // do some heavy processing
         return stream.Range(1, n+1).Reduce(1, (a, b int) int{ return a * b})
     }).
     Reduce(1, (a, b int) int{ return a * b})
-fmt.Println("The factorial of 8 is", fac8)
+fmt.Println("The facOfFac of 900000 is", facOfFac)
 ```
 
 ## Limitations

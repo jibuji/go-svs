@@ -1,6 +1,10 @@
 package stream
 
-import "sync/atomic"
+import (
+	"sync/atomic"
+
+	"golang.org/x/exp/constraints"
+)
 
 type stream[T any] struct {
 	// sorted   bool
@@ -34,6 +38,27 @@ func OfChannel[T any](ch chan T) stream[T] {
 		nextFn: func() (T, bool) {
 			v, ok := <-ch
 			return v, ok
+		},
+	}
+}
+
+func Generate[T any](fn func() (T, bool)) stream[T] {
+	return stream[T]{
+		parallel: 1,
+		nextFn:   fn,
+	}
+}
+
+func Range[T constraints.Integer](start, end T) stream[T] {
+	return stream[T]{
+		parallel: 1,
+		nextFn: func() (T, bool) {
+			if start >= end {
+				return 0, false
+			}
+			result := start
+			start++
+			return result, true
 		},
 	}
 }
