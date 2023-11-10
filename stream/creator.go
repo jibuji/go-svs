@@ -1,6 +1,7 @@
 package stream
 
 import (
+	"sync"
 	"sync/atomic"
 
 	"golang.org/x/exp/constraints"
@@ -49,10 +50,15 @@ func Generate[T any](fn func() (T, bool)) stream[T] {
 	}
 }
 
+// Range returns a stream of integers from start (inclusive) to end (exclusive)
+// The generating process is thread-safe
 func Range[T constraints.Integer](start, end T) stream[T] {
+	lock := &sync.Mutex{}
 	return stream[T]{
 		parallel: 1,
 		nextFn: func() (T, bool) {
+			lock.Lock()
+			defer lock.Unlock()
 			if start >= end {
 				return 0, false
 			}

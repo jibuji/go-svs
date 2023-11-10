@@ -227,14 +227,40 @@ The factorial of 8 is 40320
 ### Example 7: Paralleling process
 
 ```go
-facOfFac, _ := stream.Range(1, 20).
-    Parallel(4). // parallelize the process and use 4 goroutines, then the following operations will be executed in parallel (if possible)
-    Map(func(n int) int {
-        // do some heavy processing
-        return stream.Range(1, n+1).Reduce(1, (a, b int) int{ return a * b})
-    }).
-    Reduce(1, (a, b int) int{ return a * b})
-fmt.Println("The facOfFac of 900000 is", facOfFac)
+
+func isPrime(n int) bool {
+	for i := 2; i < n/2; i++ {
+		if n%i == 0 {
+			return false
+		}
+	}
+	return true
+}
+
+func main() {
+	// we do some complex and nonsense calculation in parallel
+	result := stream.Range(1, 1000).
+		Parallel(4). // parallelize the process and use 4 goroutines, then the following operations will be executed in parallel (if possible)
+		Filter(isPrime).
+		Map(func(n int) int {
+			// simulate a complex calculation
+			time.Sleep(100 * time.Nanosecond)
+			return (n + 1) / 2
+		}).
+		Reduce(0, func(a, b int) int {
+			// simulate a complex calculation
+			time.Sleep(100 * time.Nanosecond)
+			return a + b
+		})
+	fmt.Println("The nonsense result is", result)
+}
+
+```
+
+Output:
+
+```
+The nonsense result is 38150
 ```
 
 ## Limitations
